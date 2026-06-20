@@ -1,0 +1,99 @@
+# ============================================================
+#  QuantumVault — Requirements
+#  Futuristic Bank App with Quantum Key Distribution (BB84)
+# ============================================================
+#
+#  This project is a pure frontend application.
+#  There are NO npm packages or pip packages to install.
+#  All dependencies are loaded via CDN at runtime.
+# ============================================================
+
+
+# ── RUNTIME CDN DEPENDENCIES ────────────────────────────────
+#  These are fetched automatically by the browser when the
+#  app loads. No manual installation required.
+
+# Typography — Google Fonts
+#   Space Grotesk (weights: 300, 400, 500, 600, 700)
+#   URL: https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700
+#
+#   Space Mono (weights: 400, 700)
+#   URL: https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700
+
+# Icon Set — Tabler Icons Webfont (latest)
+#   URL: https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css
+#   License: MIT
+
+
+# ── BROWSER REQUIREMENTS ────────────────────────────────────
+#  The following browser APIs must be supported.
+#  All modern browsers (2020+) support these natively.
+
+#   Canvas API (2D context)         — animations, QR, photon channel
+#   requestAnimationFrame           — 60fps canvas rendering
+#   setInterval / setTimeout        — photon spawning, key rotation
+#   ES6+ JavaScript                 — arrow functions, destructuring,
+#                                     template literals, Array.from,
+#                                     spread operator, let/const
+#   CSS Custom Properties           — design token system (--cyan, etc.)
+#   CSS Grid & Flexbox              — layout
+#   Google Fonts API                — web font loading
+
+
+# ── MINIMUM BROWSER VERSIONS ────────────────────────────────
+
+#   Google Chrome      88+
+#   Mozilla Firefox    85+
+#   Apple Safari       14+
+#   Microsoft Edge     88+
+#   Opera              74+
+#   Mobile Chrome      88+   (Android)
+#   Mobile Safari      14+   (iOS)
+
+
+# ── LOCAL DEVELOPMENT (optional) ────────────────────────────
+#  No build step is required. To serve locally, use any of:
+
+#   Python 3
+#     python3 -m http.server 8080
+
+#   Node.js (via npx, no install needed)
+#     npx serve .
+
+#   VS Code
+#     Install "Live Server" extension → right-click index.html → Open with Live Server
+
+
+# ── PYTHON (optional backend / future extension) ─────────────
+#  If you extend QuantumVault with a Python backend, suggested packages:
+
+#   flask==3.1.0              # lightweight web server
+#   flask-cors==5.0.0         # cross-origin requests
+#   cryptography==43.0.0      # real AES / OTP encryption primitives
+#   numpy==2.1.0              # quantum simulation math
+#   qiskit==1.2.0             # IBM Qiskit for real QKD simulation
+#   qiskit-aer==0.15.0        # Qiskit noise/simulator backend
+#   websockets==13.0          # real-time QKD key streaming
+
+
+# ── NODE.JS (optional frontend tooling / future extension) ───
+#  If you extend QuantumVault with a build pipeline:
+
+#   vite@6.0.0                # dev server + bundler
+#   tailwindcss@4.0.0         # utility CSS (currently using custom CSS)
+#   typescript@5.7.0          # type safety
+
+
+# ── NO INSTALLATION NEEDED FOR CURRENT VERSION ───────────────
+#
+#  Current stack:
+#    HTML5       — structure
+#    CSS3        — styling, animations, CSS variables
+#    Vanilla JS  — all logic, QKD simulation, canvas
+#
+#  To run:
+#    1. Download index.html
+#    2. Open in any modern browser
+#    Done.
+#
+# ============================================================
