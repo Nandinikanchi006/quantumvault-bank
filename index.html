@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuantumVault — Quantum-Secured Banking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#020B18;--surface:#0A1628;--surface2:#0F1E35;--surface3:#162540;
+  --cyan:#00D4FF;--cyan-dim:#0090BB;--cyan-faint:rgba(0,212,255,0.08);
+  --cyan-glow:rgba(0,212,255,0.15);--cyan-border:rgba(0,212,255,0.2);
+  --green:#00FF94;--green-dim:rgba(0,255,148,0.12);
+  --red:#FF4D6A;--red-dim:rgba(255,77,106,0.12);
+  --amber:#FFB800;--amber-dim:rgba(255,184,0,0.1);
+  --text:#E8F4FF;--text-muted:#6B8FAB;--text-dim:#3A5A78;
+  --border:rgba(0,212,255,0.12);--border-bright:rgba(0,212,255,0.3);
+  --r:10px;--r-lg:14px;
+}
+body{font-family:'Space Grotesk',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+/* SCREENS */
+.screen{display:none;width:100%;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── LOGIN ── */
+#s-login{align-items:center;justify-content:center;padding:2rem 1rem;position:relative;overflow:hidden}
+.login-bg{position:absolute;inset:0;pointer-events:none}
+.login-card{position:relative;z-index:2;width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border-bright);border-radius:var(--r-lg);padding:2.5rem 2rem}
+.logo-mark{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.brand{font-size:22px;font-weight:700;letter-spacing:-0.5px;color:var(--text)}
+.brand span{color:var(--cyan)}
+.login-title{font-size:18px;font-weight:600;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text-muted);margin-bottom:1.75rem}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase}
+.field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:.2s}
+.field input:focus{border-color:var(--cyan);background:var(--surface3)}
+.field input::placeholder{color:var(--text-dim)}
+.pin-row{display:flex;gap:8px}
+.pin-dot{flex:1;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--cyan);transition:.2s}
+.pin-dot.filled{border-color:var(--cyan);background:var(--cyan-faint)}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:1.25rem 0}
+.key{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);height:44px;font-size:16px;font-weight:500;color:var(--text);cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif}
+.key:hover{background:var(--surface3);border-color:var(--cyan-border)}
+.key:active{transform:scale(.96)}
+.key.del{font-size:13px;color:var(--text-muted)}
+.btn-login{width:100%;background:var(--cyan);color:var(--navy);border:none;border-radius:var(--r);height:46px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;letter-spacing:.3px;margin-top:.5rem}
+.btn-login:hover{background:#33DEFF}
+.btn-login:active{transform:scale(.98)}
+.qkd-chip{display:inline-flex;align-items:center;gap:6px;background:var(--cyan-faint);border:1px solid var(--cyan-border);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--cyan);margin-top:1.25rem}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* ── APP SHELL ── */
+#s-app{flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.topbar-logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700}
+.topbar-logo span{color:var(--cyan)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.notif-btn{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);position:relative;font-size:15px}
+.notif-dot{width:7px;height:7px;background:var(--red);border-radius:50%;position:absolute;top:5px;right:5px;border:1.5px solid var(--surface)}
+.avatar-sm{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--cyan-faint),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;border:1.5px solid var(--cyan)}
+.qkd-live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--cyan);font-family:'Space Mono',monospace;background:var(--cyan-faint);border:1px solid var(--cyan-border);padding:4px 10px;border-radius:20px}
+
+.content{flex:1;overflow-y:auto;padding:16px 16px 90px}
+
+/* NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;border:none;background:transparent;color:var(--text-muted);font-size:9px;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;letter-spacing:.5px;transition:.15s}
+.nav-item i{font-size:18px}
+.nav-item.active{color:var(--cyan)}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+
+/* BALANCE CARD */
+.balance-card{background:var(--surface);border:1px solid var(--border-bright);border-radius:var(--r-lg);padding:1.5rem;margin-bottom:14px;position:relative;overflow:hidden}
+.bc-canvas{position:absolute;inset:0;opacity:.5}
+.bc-inner{position:relative;z-index:2}
+.bc-label{font-size:11px;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.bc-amount{font-size:36px;font-weight:700;letter-spacing:-1.5px;color:var(--text);line-height:1}
+.bc-amount .cur{font-size:20px;font-weight:400;color:var(--text-muted);vertical-align:top;margin-top:5px;display:inline-block;margin-right:2px}
+.bc-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:1.25rem}
+.bc-accs{display:flex;gap:16px}
+.bc-acc{font-size:12px;color:var(--text-muted)}
+.bc-acc strong{display:block;font-size:14px;font-weight:600;color:var(--text);font-family:'Space Mono',monospace}
+.bc-shield{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--cyan);background:var(--cyan-faint);border:1px solid var(--cyan-border);padding:4px 10px;border-radius:20px}
+
+/* QUICK ACTIONS */
+.qa-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.qa{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 6px;text-align:center;cursor:pointer;transition:.15s}
+.qa:hover{border-color:var(--cyan-border);background:var(--surface2)}
+.qa i{font-size:22px;color:var(--cyan);display:block;margin-bottom:5px}
+.qa span{font-size:11px;color:var(--text-muted)}
+
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-title{font-size:13px;font-weight:600;letter-spacing:.3px}
+.section-link{font-size:12px;color:var(--cyan);cursor:pointer;background:none;border:none;font-family:'Space Grotesk',sans-serif}
+
+/* DEBIT CARD */
+.debit-card{background:var(--surface2);border:1px solid var(--border-bright);border-radius:14px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;min-height:160px}
+.card-chip{width:30px;height:22px;border-radius:4px;background:var(--amber);opacity:.8;margin-bottom:14px}
+.card-num{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:2px;color:var(--text);margin-bottom:12px}
+.card-row{display:flex;justify-content:space-between;align-items:flex-end}
+.card-name{font-size:13px;font-weight:600;letter-spacing:.5px}
+.card-exp{font-size:11px;color:var(--text-muted)}
+.card-brand{font-size:22px;color:var(--text-muted);font-weight:700;font-family:'Space Mono',monospace}
+.card-hologram{position:absolute;top:14px;right:14px;width:40px;height:40px;border-radius:50%;border:1px solid var(--cyan-border);display:flex;align-items:center;justify-content:center;color:var(--cyan);font-size:18px}
+.card-bg-geo{position:absolute;bottom:-20px;right:-20px;width:140px;height:140px;border-radius:50%;border:1px solid var(--cyan-border);opacity:.3}
+.card-bg-geo2{position:absolute;bottom:-40px;right:-40px;width:180px;height:180px;border-radius:50%;border:1px solid var(--cyan-border);opacity:.15}
+
+/* TRANSACTIONS */
+.tx-mini{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.tx-mini:last-child{border-bottom:none}
+.tx-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tx-ico.out{background:var(--red-dim);color:var(--red)}
+.tx-ico.inc{background:var(--green-dim);color:var(--green)}
+.tx-info2{flex:1}
+.tx-n{font-size:13px;font-weight:500}
+.tx-d{font-size:11px;color:var(--text-muted);margin-top:1px}
+.tx-enc-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan-dim);margin-top:2px}
+.tx-amt{font-size:14px;font-weight:600;text-align:right}
+.tx-amt.out{color:var(--red)}
+.tx-amt.inc{color:var(--green)}
+.tx-v{font-size:10px;color:var(--cyan);display:flex;align-items:center;gap:2px;justify-content:flex-end;margin-top:2px}
+
+/* STAT CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.stat-v{font-size:20px;font-weight:700;font-family:'Space Mono',monospace;color:var(--cyan)}
+.stat-l{font-size:11px;color:var(--text-muted);margin-top:3px}
+
+/* SEND FORM */
+.panel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem;margin-bottom:12px}
+.panel-title{font-size:15px;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.panel-title i{color:var(--cyan)}
+.f-label{font-size:11px;color:var(--text-muted);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;display:block}
+.f-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:14px;outline:none;transition:.2s;margin-bottom:12px}
+.f-input:focus{border-color:var(--cyan)}
+.f-input::placeholder{color:var(--text-dim)}
+select.f-input{cursor:pointer}
+.f-amount-wrap{position:relative;margin-bottom:12px}
+.f-amount-pre{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:18px;font-family:'Space Mono',monospace}
+.f-amount{padding-left:28px!important;font-size:22px!important;font-family:'Space Mono',monospace!important;font-weight:700!important}
+.btn-send{width:100%;background:var(--cyan);color:var(--navy);border:none;border-radius:var(--r);height:48px;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-send:hover{background:#33DEFF}
+.btn-send:active{transform:scale(.98)}
+.btn-outline{width:100%;background:transparent;color:var(--cyan);border:1px solid var(--cyan-border);border-radius:var(--r);height:44px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn-outline:hover{background:var(--cyan-faint)}
+
+/* QKD BOX */
+.qkd-box{background:var(--navy);border:1px solid var(--cyan-border);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.qkd-box-title{font-size:11px;color:var(--cyan);font-family:'Space Mono',monospace;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.qstep{display:flex;gap:10px;margin-bottom:8px;font-size:12px;align-items:flex-start}
+.qstep:last-child{margin-bottom:0}
+.qnum{width:18px;height:18px;border-radius:50%;border:1px solid var(--cyan-border);color:var(--cyan);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:'Space Mono',monospace}
+.qstep-t{color:var(--text-muted);line-height:1.5}
+.qstep-t b{color:var(--text);font-weight:500}
+.mono-chip{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan);background:var(--cyan-faint);padding:1px 5px;border-radius:3px}
+
+/* CIPHER RESULT */
+.cipher-result{background:var(--navy);border:1px solid var(--cyan-border);border-radius:var(--r);padding:10px;margin:10px 0;display:none}
+.cipher-label{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.cipher-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--cyan);word-break:break-all;line-height:1.5}
+
+/* TOAST */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--surface2);border:1px solid var(--border-bright);border-radius:var(--r);padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast i{font-size:16px}
+.toast.success{border-color:rgba(0,255,148,.3);color:var(--green)}
+.toast.error{border-color:rgba(255,77,106,.3);color:var(--red)}
+.toast.info{border-color:var(--cyan-border);color:var(--cyan)}
+
+/* QKD LAB */
+.qlab-canvas-wrap{background:var(--navy);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.qlab-canvas-wrap canvas{display:block;width:100%;height:140px}
+.bb84-table{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:11px;margin-top:8px}
+.bb84-table th{color:var(--text-muted);font-weight:400;padding:4px 6px;text-align:left;border-bottom:1px solid var(--border)}
+.bb84-table td{padding:4px 6px;border-bottom:1px solid rgba(0,212,255,.05)}
+.bb84-table td.keep{color:var(--green)}
+.bb84-table td.drop{color:var(--red)}
+.bb84-table td.cyan{color:var(--cyan)}
+
+/* HISTORY */
+.filter-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.filter-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text-muted);cursor:pointer;white-space:nowrap;transition:.15s;flex-shrink:0}
+.filter-chip.active{background:var(--cyan-faint);border-color:var(--cyan-border);color:var(--cyan)}
+
+/* PROFILE */
+.profile-hero{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;margin-bottom:12px;text-align:center}
+.profile-av{width:64px;height:64px;border-radius:50%;background:var(--cyan-faint);border:2px solid var(--cyan);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--cyan)}
+.profile-name{font-size:18px;font-weight:700;margin-bottom:2px}
+.profile-id{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-muted)}
+.settings-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.settings-row:last-child{border-bottom:none}
+.sr-icon{width:32px;height:32px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--cyan);flex-shrink:0}
+.sr-info{flex:1}
+.sr-info b{display:block;font-size:14px;font-weight:500}
+.sr-info span{font-size:11px;color:var(--text-muted)}
+.sr-arrow{color:var(--text-dim);font-size:14px}
+
+/* LOAN */
+.loan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center}
+.loan-icon{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:var(--amber-dim);color:var(--amber)}
+.loan-info{flex:1}
+.loan-name{font-size:14px;font-weight:500}
+.loan-meta{font-size:11px;color:var(--text-muted);margin-top:2px}
+.loan-amt{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;text-align:right;color:var(--amber)}
+.progress-bar{width:100%;height:4px;background:var(--surface2);border-radius:2px;margin-top:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:var(--amber)}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"><i></i><span id="toast-msg"></span></div>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div class="screen active" id="s-login">
+  <canvas id="bg-canvas" class="login-bg"></canvas>
+  <div class="login-card">
+    <div class="logo-mark">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="#00D4FF" stroke-width="1.5"/>
+        <polygon points="20,8 30,14 30,26 20,32 10,26 10,14" fill="rgba(0,212,255,.08)" stroke="#00D4FF" stroke-width=".5"/>
+        <circle cx="20" cy="20" r="4" fill="#00D4FF" opacity=".9"/>
+      </svg>
+      <div class="brand">Quantum<span>Vault</span></div>
+    </div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Enter your ID and 4-digit PIN to access your account</div>
+    <div class="field">
+      <label for="login-id">Account ID</label>
+      <input type="text" id="login-id" placeholder="QV-XXXX-XXXX" value="QV-2847-9301" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label>Security PIN</label>
+      <div class="pin-row" id="pin-dots">
+        <div class="pin-dot" id="d0">·</div>
+        <div class="pin-dot" id="d1">·</div>
+        <div class="pin-dot" id="d2">·</div>
+        <div class="pin-dot" id="d3">·</div>
+      </div>
+    </div>
+    <div class="numpad" role="group" aria-label="PIN numpad">
+      <button class="key" onclick="pinKey('1')">1</button>
+      <button class="key" onclick="pinKey('2')">2</button>
+      <button class="key" onclick="pinKey('3')">3</button>
+      <button class="key" onclick="pinKey('4')">4</button>
+      <button class="key" onclick="pinKey('5')">5</button>
+      <button class="key" onclick="pinKey('6')">6</button>
+      <button class="key" onclick="pinKey('7')">7</button>
+      <button class="key" onclick="pinKey('8')">8</button>
+      <button class="key" onclick="pinKey('9')">9</button>
+      <button class="key" onclick="pinKey('0')">0</button>
+      <button class="key del" onclick="pinDel()">⌫ del</button>
+    </div>
+    <button class="btn-login" onclick="doLogin()">Authenticate with QKD</button>
+    <div class="qkd-chip"><div class="pulse"></div> BB84 quantum channel active</div>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div class="screen" id="s-app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg width="24" height="24" viewBox="0 0 40 40" aria-hidden="true">
+        <polygon points="20,2 36,11 36,29 20,38 4,29 4,11" fill="none" stroke="#00D4FF" stroke-width="2"/>
+        <circle cx="20" cy="20" r="5" fill="#00D4FF"/>
+      </svg>
+      Quantum<span>Vault</span>
+    </div>
+    <div class="topbar-right">
+      <div class="qkd-live"><div class="pulse"></div><span id="live-key-short">1011001…</span></div>
+      <div class="notif-btn" onclick="showToast('No new notifications','info')" aria-label="Notifications">
+        <i class="ti ti-bell" aria-hidden="true"></i><div class="notif-dot"></div>
+      </div>
+      <div class="avatar-sm" aria-label="Profile">AJ</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="balance-card">
+        <canvas class="bc-canvas" id="lattice-canvas"></canvas>
+        <div class="bc-inner">
+          <div class="bc-label">Total balance</div>
+          <div class="bc-amount"><span class="cur">₹</span><span id="total-bal">2,54,800</span></div>
+          <div class="bc-row">
+            <div class="bc-accs">
+              <div class="bc-acc"><strong id="sav-bal">₹2,00,000</strong>Savings</div>
+              <div class="bc-acc"><strong id="cur-bal">₹54,800</strong>Current</div>
+            </div>
+            <div class="bc-shield"><i class="ti ti-shield-check" aria-hidden="true" style="font-size:13px"></i> QKD secured</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="qa-row">
+        <div class="qa" onclick="navTo('send')" role="button" tabindex="0"><i class="ti ti-send" aria-hidden="true"></i><span>Send</span></div>
+        <div class="qa" onclick="navTo('receive')" role="button" tabindex="0"><i class="ti ti-qrcode" aria-hidden="true"></i><span>Receive</span></div>
+        <div class="qa" onclick="navTo('history')" role="button" tabindex="0"><i class="ti ti-history" aria-hidden="true"></i><span>History</span></div>
+        <div class="qa" onclick="navTo('qkd')" role="button" tabindex="0"><i class="ti ti-atom" aria-hidden="true"></i><span>QKD Lab</span></div>
+      </div>
+
+      <div class="debit-card">
+        <div class="card-bg-geo"></div><div class="card-bg-geo2"></div>
+        <div class="card-hologram"><i class="ti ti-atom" aria-hidden="true"></i></div>
+        <div class="card-chip"></div>
+        <div class="card-num">4891 &nbsp;•••• &nbsp;•••• &nbsp;7293</div>
+        <div class="card-row">
+          <div>
+            <div class="card-name">ARJUN JOSHI</div>
+            <div class="card-exp" style="margin-top:2px">Expires 09/29</div>
+          </div>
+          <div class="card-brand">VISA</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <span class="section-title">Recent transactions</span>
+        <button class="section-link" onclick="navTo('history')">See all →</button>
+      </div>
+      <div class="panel-card" style="padding:0.75rem 1rem" id="recent-tx"></div>
+
+      <div class="stat-row" style="margin-top:14px">
+        <div class="stat"><div class="stat-v" id="stat-keys-h">0</div><div class="stat-l">QKD keys used</div></div>
+        <div class="stat"><div class="stat-v" id="stat-qber-h">0.3%</div><div class="stat-l">Avg QBER</div></div>
+        <div class="stat"><div class="stat-v" id="stat-secure-h">100%</div><div class="stat-l">Integrity</div></div>
+      </div>
+    </div>
+
+    <!-- SEND -->
+    <div class="page" id="page-send">
+      <div class="panel-card">
+        <div class="panel-title"><i class="ti ti-send" aria-hidden="true"></i> New transfer</div>
+        <label class="f-label" for="from-acc">From</label>
+        <select class="f-input" id="from-acc">
+          <option value="savings">Savings — ₹2,00,000</option>
+          <option value="current">Current — ₹54,800</option>
+        </select>
+        <label class="f-label" for="s-recipient">To (recipient)</label>
+        <input class="f-input" type="text" id="s-recipient" placeholder="Name, UPI ID or account number"/>
+        <label class="f-label" for="s-amount">Amount (₹)</label>
+        <div class="f-amount-wrap">
+          <span class="f-amount-pre">₹</span>
+          <input class="f-input f-amount" type="number" id="s-amount" placeholder="0"/>
+        </div>
+        <label class="f-label" for="s-note">Remark</label>
+        <input class="f-input" type="text" id="s-note" placeholder="e.g. Rent, groceries…"/>
+        <label class="f-label" for="tx-type">Transfer type</label>
+        <select class="f-input" id="tx-type">
+          <option>IMPS — Instant</option>
+          <option>NEFT — Scheduled</option>
+          <option>RTGS — High value</option>
+        </select>
+      </div>
+
+      <div class="qkd-box">
+        <div class="qkd-box-title"><i class="ti ti-atom" aria-hidden="true"></i> QKD ENCRYPTION PIPELINE</div>
+        <div class="qstep"><div class="qnum">1</div><div class="qstep-t"><b>Photon emission</b> — Alice fires photons in random BB84 bases <span class="mono-chip">|H⟩ |V⟩ |D⟩ |A⟩</span></div></div>
+        <div class="qstep"><div class="qnum">2</div><div class="qstep-t"><b>Basis sifting</b> — Bob announces bases; ~50% kept where they match</div></div>
+        <div class="qstep"><div class="qnum">3</div><div class="qstep-t"><b>QBER check</b> — error rate computed; eavesdrop flagged if QBER &gt; 11%</div></div>
+        <div class="qstep"><div class="qnum">4</div><div class="qstep-t"><b>OTP encryption</b> — transaction payload XOR'd with sifted key bits</div></div>
+      </div>
+
+      <div class="cipher-result" id="cipher-result">
+        <div class="cipher-label">Encrypted payload (hex)</div>
+        <div class="cipher-val" id="cipher-val"></div>
+        <div style="margin-top:6px;font-size:11px;color:var(--text-muted)">
+          Key length: <span id="key-len" style="color:var(--cyan);font-family:monospace"></span> bits ·
+          QBER: <span id="tx-qber" style="color:var(--cyan);font-family:monospace"></span>
+        </div>
+      </div>
+
+      <button class="btn-send" onclick="doSend()">
+        <i class="ti ti-shield-check" aria-hidden="true"></i> Send securely via QKD
+      </button>
+    </div>
+
+    <!-- RECEIVE -->
+    <div class="page" id="page-receive">
+      <div class="panel-card" style="text-align:center">
+        <div class="panel-title" style="justify-content:center"><i class="ti ti-qrcode" aria-hidden="true"></i> Receive funds</div>
+        <canvas id="qr-canvas" width="160" height="160" style="margin:0 auto 1rem;display:block;border-radius:var(--r);border:1px solid var(--border)" aria-label="QR code for receiving payments"></canvas>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">Your UPI ID</div>
+        <div style="font-family:'Space Mono',monospace;font-size:14px;color:var(--cyan);background:var(--cyan-faint);padding:8px 14px;border-radius:var(--r);border:1px solid var(--cyan-border)">arjun.joshi@qvault</div>
+        <div style="margin-top:1rem;font-size:12px;color:var(--text-muted)">Account: <b style="color:var(--text)">QVBK0002847 9301</b></div>
+        <div style="margin-top:4px;font-size:12px;color:var(--text-muted)">IFSC: <b style="color:var(--text)">QVBK0000001</b></div>
+        <button class="btn-outline" style="margin-top:1.25rem" onclick="showToast('QR code saved to gallery','success')">
+          <i class="ti ti-download" aria-hidden="true"></i> Save QR
+        </button>
+      </div>
+      <div class="panel-card">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Request specific amount</div>
+        <label class="f-label" for="req-amount">Amount</label>
+        <div class="f-amount-wrap">
+          <span class="f-amount-pre">₹</span>
+          <input class="f-input f-amount" type="number" id="req-amount" placeholder="0"/>
+        </div>
+        <label class="f-label" for="req-msg">Message</label>
+        <input class="f-input" type="text" id="req-msg" placeholder="e.g. Split dinner"/>
+        <button class="btn-send" onclick="showToast('Payment request sent','info')">
+          <i class="ti ti-link" aria-hidden="true"></i> Share payment link
+        </button>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="filter-row" role="group" aria-label="Transaction filters">
+        <div class="filter-chip active" onclick="filterTx('all',this)" role="button" tabindex="0">All</div>
+        <div class="filter-chip" onclick="filterTx('send',this)" role="button" tabindex="0">Sent</div>
+        <div class="filter-chip" onclick="filterTx('recv',this)" role="button" tabindex="0">Received</div>
+        <div class="filter-chip" onclick="filterTx('loan',this)" role="button" tabindex="0">Loan EMIs</div>
+      </div>
+      <div class="panel-card" style="padding:0.75rem 1rem" id="all-tx"></div>
+    </div>
+
+    <!-- QKD LAB -->
+    <div class="page" id="page-qkd">
+      <div class="stat-row">
+        <div class="stat"><div class="stat-v" id="lab-keys">0</div><div class="stat-l">Keys generated</div></div>
+        <div class="stat"><div class="stat-v" id="lab-bits">0</div><div class="stat-l">Sifted bits</div></div>
+        <div class="stat"><div class="stat-v" id="lab-qber">—</div><div class="stat-l">Last QBER</div></div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title" style="font-size:13px"><i class="ti ti-atom" aria-hidden="true"></i> Live photon channel — Alice → Bob</div>
+        <div class="qlab-canvas-wrap"><canvas id="photon-canvas" height="140" aria-label="Animated photon channel"></canvas></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <span style="font-size:11px;background:rgba(0,212,255,.15);color:#00D4FF;padding:3px 8px;border-radius:10px">H horizontal</span>
+          <span style="font-size:11px;background:rgba(0,255,148,.12);color:#00FF94;padding:3px 8px;border-radius:10px">V vertical</span>
+          <span style="font-size:11px;background:rgba(255,184,0,.1);color:#FFB800;padding:3px 8px;border-radius:10px">D diagonal</span>
+          <span style="font-size:11px;background:rgba(255,77,106,.12);color:#FF4D6A;padding:3px 8px;border-radius:10px">A anti-diag</span>
+        </div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title" style="font-size:13px"><i class="ti ti-table" aria-hidden="true"></i> BB84 simulation (last exchange)</div>
+        <div id="bb84-wrap" style="overflow-x:auto">
+          <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:1rem">Run a key exchange to see results</div>
+        </div>
+      </div>
+      <button class="btn-send" onclick="runBB84Lab()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Run BB84 key exchange
+      </button>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="profile-hero">
+        <div class="profile-av">AJ</div>
+        <div class="profile-name">Arjun Joshi</div>
+        <div class="profile-id">QV-2847-9301 · arjun.joshi@qvault</div>
+        <div class="qkd-chip" style="margin-top:10px"><div class="pulse"></div> Identity verified via QKD biometrics</div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title" style="font-size:13px;margin-bottom:0"><i class="ti ti-settings" aria-hidden="true"></i> Account settings</div>
+        <div class="settings-row" onclick="showToast('Biometric settings','info')"><div class="sr-icon"><i class="ti ti-fingerprint" aria-hidden="true"></i></div><div class="sr-info"><b>Biometric auth</b><span>Face ID + fingerprint enabled</span></div><i class="ti ti-chevron-right sr-arrow" aria-hidden="true"></i></div>
+        <div class="settings-row" onclick="showToast('QKD settings opened','info')"><div class="sr-icon"><i class="ti ti-atom" aria-hidden="true"></i></div><div class="sr-info"><b>QKD settings</b><span>BB84 · 256-bit sifted keys</span></div><i class="ti ti-chevron-right sr-arrow" aria-hidden="true"></i></div>
+        <div class="settings-row" onclick="showToast('Card settings','info')"><div class="sr-icon"><i class="ti ti-credit-card" aria-hidden="true"></i></div><div class="sr-info"><b>Card controls</b><span>Freeze, limits, virtual card</span></div><i class="ti ti-chevron-right sr-arrow" aria-hidden="true"></i></div>
+        <div class="settings-row" onclick="showToast('Notifications configured','info')"><div class="sr-icon"><i class="ti ti-bell" aria-hidden="true"></i></div><div class="sr-info"><b>Notifications</b><span>All alerts on</span></div><i class="ti ti-chevron-right sr-arrow" aria-hidden="true"></i></div>
+        <div class="settings-row" onclick="doLogout()"><div class="sr-icon" style="background:var(--red-dim);color:var(--red)"><i class="ti ti-logout" aria-hidden="true"></i></div><div class="sr-info"><b style="color:var(--red)">Sign out</b><span>End QKD session</span></div><i class="ti ti-chevron-right sr-arrow" aria-hidden="true"></i></div>
+      </div>
+      <div class="panel-card">
+        <div class="panel-title" style="font-size:13px"><i class="ti ti-credit-card" aria-hidden="true"></i> Loans &amp; credit</div>
+        <div class="loan-card">
+          <div class="loan-icon"><i class="ti ti-home" aria-hidden="true"></i></div>
+          <div class="loan-info">
+            <div class="loan-name">Home loan</div>
+            <div class="loan-meta">EMI: ₹22,400 · Due 5 Jul</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:62%"></div></div>
+          </div>
+          <div class="loan-amt">₹18.4L<div style="font-size:10px;color:var(--text-muted);font-weight:400">remaining</div></div>
+        </div>
+        <div class="loan-card">
+          <div class="loan-icon" style="background:rgba(0,212,255,.08);color:var(--cyan)"><i class="ti ti-car" aria-hidden="true"></i></div>
+          <div class="loan-info">
+            <div class="loan-name">Car loan</div>
+            <div class="loan-meta">EMI: ₹8,200 · Due 12 Jul</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:35%;background:var(--cyan)"></div></div>
+          </div>
+          <div class="loan-amt" style="color:var(--cyan)">₹3.2L<div style="font-size:10px;color:var(--text-muted);font-weight:400">remaining</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="nav-item active" id="nav-home" onclick="navTo('home')"><i class="ti ti-home" aria-hidden="true"></i>Home</button>
+    <button class="nav-item" id="nav-send" onclick="navTo('send')"><i class="ti ti-send" aria-hidden="true"></i>Send</button>
+    <button class="nav-item" id="nav-history" onclick="navTo('history')"><i class="ti ti-history" aria-hidden="true"></i>History</button>
+    <button class="nav-item" id="nav-qkd" onclick="navTo('qkd')"><i class="ti ti-atom" aria-hidden="true"></i>QKD Lab</button>
+    <button class="nav-item" id="nav-profile" onclick="navTo('profile')"><i class="ti ti-user" aria-hidden="true"></i>Profile</button>
+  </nav>
+</div><!-- /s-app -->
+
+<script>
+// ── State ──────────────────────────────────────────
+const PIN_CORRECT = '2847';
+let pin = '';
+let savings = 200000, current = 54800;
+let keysUsed = 0, totalSiftedBits = 0, lastQBER = '0.3%';
+
+let transactions = [
+  {id:1,type:'recv',name:'Salary — TechCorp',amount:80000,date:'15 Jun 2026',note:'June salary',enc:'A3F2...9C1B'},
+  {id:2,type:'send',name:'Priya Mehta',amount:12000,date:'12 Jun 2026',note:'Rent share',enc:'B7D1...4E3A'},
+  {id:3,type:'send',name:'Amazon Pay',amount:3499,date:'10 Jun 2026',note:'Order #48291',enc:'C2A8...7F0E'},
+  {id:4,type:'recv',name:'Rohan Sharma',amount:5000,date:'8 Jun 2026',note:'Dinner split',enc:'D9C3...2B6F'},
+  {id:5,type:'send',name:'Home Loan EMI',amount:22400,date:'5 Jun 2026',note:'HDFC Home Loan',enc:'E1F4...3A8C'},
+  {id:6,type:'recv',name:'Freelance — UI',amount:25000,date:'2 Jun 2026',note:'Figma project',enc:'F8B2...6D1E'},
+];
+
+// ── PIN ────────────────────────────────────────────
+function pinKey(d){ if(pin.length>=4)return; pin+=d; updateDots(); }
+function pinDel(){ pin=pin.slice(0,-1); updateDots(); }
+function updateDots(){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('d'+i);
+    d.textContent=i<pin.length?'●':'·';
+    d.classList.toggle('filled',i<pin.length);
+  }
+}
+
+// ── Auth ───────────────────────────────────────────
+function doLogin(){
+  const id=document.getElementById('login-id').value.trim();
+  if(!id){showToast('Enter your account ID','error');return;}
+  if(pin.length<4){showToast('Enter your 4-digit PIN','error');return;}
+  if(pin!==PIN_CORRECT){showToast('Incorrect PIN — try 2847','error');pin='';updateDots();return;}
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('s-app').classList.add('active');
+  renderAll(); startLattice(); startPhotonCanvas(); startKeyRotation();
+  showToast('QKD session established','success');
+}
+function doLogout(){
+  document.getElementById('s-app').classList.remove('active');
+  document.getElementById('s-login').classList.add('active');
+  pin=''; updateDots(); showToast('Signed out','info');
+}
+
+// ── Toast ──────────────────────────────────────────
+function showToast(msg,type='info'){
+  const t=document.getElementById('toast');
+  const ic=t.querySelector('i');
+  document.getElementById('toast-msg').textContent=msg;
+  t.className='toast show '+(type||'info');
+  ic.className=type==='success'?'ti ti-check':type==='error'?'ti ti-alert-circle':'ti ti-info-circle';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── Navigation ─────────────────────────────────────
+function navTo(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const p=document.getElementById('page-'+pg);
+  if(p)p.classList.add('active');
+  const map={home:'nav-home',send:'nav-send',receive:'nav-home',history:'nav-history',qkd:'nav-qkd',profile:'nav-profile'};
+  const n=document.getElementById(map[pg]||'nav-home');
+  if(n)n.classList.add('active');
+  if(pg==='receive')renderQR();
+}
+
+// ── Formatting ─────────────────────────────────────
+function fmtINR(n){return n.toLocaleString('en-IN');}
+
+// ── Render ─────────────────────────────────────────
+function renderAll(){ renderBalance(); renderTx(); }
+
+function renderBalance(){
+  document.getElementById('total-bal').textContent=fmtINR(savings+current);
+  document.getElementById('sav-bal').textContent='₹'+fmtINR(savings);
+  document.getElementById('cur-bal').textContent='₹'+fmtINR(current);
+  const f=document.getElementById('from-acc');
+  if(f){f.options[0].text='Savings — ₹'+fmtINR(savings);f.options[1].text='Current — ₹'+fmtINR(current);}
+  document.getElementById('stat-keys-h').textContent=keysUsed;
+  document.getElementById('stat-qber-h').textContent=lastQBER;
+}
+
+function renderTxList(el,list){
+  if(!el)return;
+  if(!list.length){el.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:1rem">No transactions found</div>';return;}
+  el.innerHTML=list.map(tx=>`
+    <div class="tx-mini">
+      <div class="tx-ico ${tx.type==='recv'?'inc':'out'}">
+        <i class="ti ${tx.type==='recv'?'ti-arrow-down-left':'ti-arrow-up-right'}" aria-hidden="true"></i>
+      </div>
+      <div class="tx-info2">
+        <div class="tx-n">${tx.name}</div>
+        <div class="tx-d">${tx.date} · ${tx.note}</div>
+        <div class="tx-enc-tag">⬡ QKD ${tx.enc}</div>
+      </div>
+      <div>
+        <div class="tx-amt ${tx.type==='recv'?'inc':'out'}">${tx.type==='recv'?'+':'-'}₹${fmtINR(tx.amount)}</div>
+        <div class="tx-v"><i class="ti ti-shield-check" aria-hidden="true" style="font-size:11px"></i>verified</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTx(){
+  renderTxList(document.getElementById('recent-tx'),transactions.slice(0,4));
+  renderTxList(document.getElementById('all-tx'),transactions);
+}
+
+function filterTx(type,el){
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const list=type==='all'?transactions:transactions.filter(t=>
+    t.type===type||(type==='loan'&&t.note.toLowerCase().includes('loan')));
+  renderTxList(document.getElementById('all-tx'),list);
+}
+
+// ── QKD / Crypto ───────────────────────────────────
+function genQKey(n){
+  const bases=['H','V','D','A'];
+  return Array.from({length:n},()=>({base:bases[Math.floor(Math.random()*4)],bit:Math.round(Math.random())}));
+}
+function encryptHex(text,keyBits){
+  return Array.from(text).map((c,i)=>(c.charCodeAt(0)^keyBits[i%keyBits.length]).toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+
+// ── Send ───────────────────────────────────────────
+function doSend(){
+  const rec=document.getElementById('s-recipient').value.trim();
+  const amt=parseFloat(document.getElementById('s-amount').value);
+  const note=document.getElementById('s-note').value.trim()||'Transfer';
+  const from=document.getElementById('from-acc').value;
+  if(!rec){showToast('Enter recipient','error');return;}
+  if(!amt||amt<=0){showToast('Enter a valid amount','error');return;}
+  const bal=from==='savings'?savings:current;
+  if(amt>bal){showToast('Insufficient balance','error');return;}
+
+  const key=genQKey(64);
+  const keyBits=key.map(k=>k.bit);
+  const payload=`${rec}:${amt}:${Date.now()}:${note}`;
+  const cipher=encryptHex(payload,keyBits);
+  const qber=(Math.random()*.7+.1).toFixed(1)+'%';
+  const shortC=cipher.slice(0,4)+'...'+cipher.slice(-4);
+
+  if(from==='savings')savings-=amt; else current-=amt;
+  keysUsed++; totalSiftedBits+=key.length; lastQBER=qber;
+  const today=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  transactions.unshift({id:Date.now(),type:'send',name:rec,amount:amt,date:today,note,enc:shortC});
+
+  document.getElementById('cipher-val').textContent=cipher.slice(0,80)+'…';
+  document.getElementById('key-len').textContent=key.length;
+  document.getElementById('tx-qber').textContent=qber;
+  document.getElementById('cipher-result').style.display='block';
+
+  renderBalance(); renderTx();
+  document.getElementById('lab-keys').textContent=keysUsed;
+  document.getElementById('lab-bits').textContent=totalSiftedBits;
+  document.getElementById('lab-qber').textContent=lastQBER;
+
+  document.getElementById('s-recipient').value='';
+  document.getElementById('s-amount').value='';
+  document.getElementById('s-note').value='';
+  showToast('₹'+fmtINR(amt)+' sent — quantum encrypted','success');
+}
+
+// ── BB84 Lab ───────────────────────────────────────
+function runBB84Lab(){
+  const n=16;
+  const opts=['+','×'];
+  const aBase=[],aBit=[],bBase=[];
+  for(let i=0;i<n;i++){
+    aBase.push(opts[Math.round(Math.random())]);
+    aBit.push(Math.round(Math.random()));
+    bBase.push(opts[Math.round(Math.random())]);
+  }
+  const sifted=[];
+  aBase.forEach((b,i)=>{if(b===bBase[i])sifted.push(aBit[i]);});
+  const qber=(Math.random()*.7+.1).toFixed(1);
+  const secure=parseFloat(qber)<11;
+  keysUsed++; totalSiftedBits+=sifted.length; lastQBER=qber+'%';
+  document.getElementById('lab-keys').textContent=keysUsed;
+  document.getElementById('lab-bits').textContent=totalSiftedBits;
+  document.getElementById('lab-qber').textContent=qber+'%';
+  document.getElementById('stat-keys-h').textContent=keysUsed;
+  document.getElementById('stat-qber-h').textContent=lastQBER;
+
+  document.getElementById('bb84-wrap').innerHTML=`
+    <table class="bb84-table">
+      <tr><th>Round</th><th>Alice base</th><th>Alice bit</th><th>Bob base</th><th>Result</th></tr>
+      ${aBase.map((b,i)=>`<tr>
+        <td class="cyan">${i+1}</td><td>${b}</td><td>${aBit[i]}</td><td>${bBase[i]}</td>
+        <td class="${b===bBase[i]?'keep':'drop'}">${b===bBase[i]?'✓ keep':'✗ drop'}</td>
+      </tr>`).join('')}
+    </table>
+    <div style="margin-top:10px;font-size:12px;color:var(--text-muted);font-family:'Space Mono',monospace;line-height:1.8">
+      Sifted key (${sifted.length} bits): <span style="color:var(--cyan)">${sifted.join('')}</span><br>
+      QBER: ${qber}% <span style="color:${secure?'var(--green)':'var(--red)'}">${secure?'✓ secure channel':'⚠ eavesdrop detected!'}</span>
+    </div>`;
+  showToast('BB84 exchange complete — '+sifted.length+' bits sifted','info');
+  startKeyRotation();
+}
+
+// ── Live key rotation ──────────────────────────────
+function startKeyRotation(){
+  const bits=Array.from({length:12},()=>Math.round(Math.random())).join('');
+  const el=document.getElementById('live-key-short');
+  if(el)el.textContent=bits+'…';
+  setTimeout(startKeyRotation,2800);
+}
+
+// ── Lattice canvas (balance card) ──────────────────
+function startLattice(){
+  const c=document.getElementById('lattice-canvas');
+  if(!c)return;
+  const par=c.parentElement;
+  c.width=par.offsetWidth; c.height=par.offsetHeight;
+  const ctx=c.getContext('2d');
+  const dots=Array.from({length:28},()=>({
+    x:Math.random()*c.width,y:Math.random()*c.height,
+    vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4
+  }));
+  (function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    dots.forEach(d=>{
+      d.x+=d.vx; d.y+=d.vy;
+      if(d.x<0||d.x>c.width)d.vx*=-1;
+      if(d.y<0||d.y>c.height)d.vy*=-1;
+    });
+    dots.forEach((a,i)=>dots.forEach((b,j)=>{
+      if(j<=i)return;
+      const dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<80){
+        ctx.strokeStyle=`rgba(0,212,255,${.18*(1-dist/80)})`;
+        ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      }
+    }));
+    dots.forEach(d=>{
+      ctx.fillStyle='rgba(0,212,255,0.5)';
+      ctx.beginPath(); ctx.arc(d.x,d.y,1.5,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+}
+
+// ── Photon canvas (QKD lab) ────────────────────────
+function startPhotonCanvas(){
+  const c=document.getElementById('photon-canvas');
+  if(!c)return;
+  c.width=c.parentElement.offsetWidth||500;
+  const ctx=c.getContext('2d');
+  const photons=[];
+  const colors=['#00D4FF','#00FF94','#FFB800','#FF4D6A'];
+  const symbols=['→','↑','↗','↖'];
+  setInterval(()=>{
+    if(photons.length<14)photons.push({
+      x:0,y:20+Math.random()*100,spd:1.5+Math.random()*2,
+      color:colors[Math.floor(Math.random()*4)],
+      sym:symbols[Math.floor(Math.random()*4)]
+    });
+  },380);
+  (function draw(){
+    ctx.clearRect(0,0,c.width,140);
+    ctx.strokeStyle='rgba(0,212,255,0.06)'; ctx.lineWidth=1;
+    for(let y=0;y<140;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke();}
+    ctx.fillStyle='rgba(0,212,255,0.3)'; ctx.font='11px Space Mono,monospace';
+    ctx.fillText('Alice',4,12); ctx.fillText('Bob',c.width-34,12);
+    for(let i=photons.length-1;i>=0;i--){
+      const ph=photons[i]; ph.x+=ph.spd;
+      if(ph.x>c.width){photons.splice(i,1);continue;}
+      ctx.fillStyle=ph.color; ctx.globalAlpha=.9;
+      ctx.beginPath(); ctx.arc(ph.x,ph.y,4,0,Math.PI*2); ctx.fill();
+      ctx.font='12px sans-serif'; ctx.fillText(ph.sym,ph.x+7,ph.y+4);
+    }
+    ctx.globalAlpha=1;
+    requestAnimationFrame(draw);
+  })();
+}
+
+// ── Login BG particles ─────────────────────────────
+(function(){
+  const c=document.getElementById('bg-canvas');
+  if(!c)return;
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  const ctx=c.getContext('2d');
+  const pts=Array.from({length:40},()=>({
+    x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3
+  }));
+  (function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(d=>{
+      d.x+=d.vx; d.y+=d.vy;
+      if(d.x<0||d.x>c.width)d.vx*=-1;
+      if(d.y<0||d.y>c.height)d.vy*=-1;
+    });
+    pts.forEach((a,i)=>pts.forEach((b,j)=>{
+      if(j<=i)return;
+      const dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){
+        ctx.strokeStyle=`rgba(0,212,255,${.12*(1-dist/120)})`;
+        ctx.lineWidth=.5; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      }
+    }));
+    pts.forEach(d=>{
+      ctx.fillStyle='rgba(0,212,255,0.35)';
+      ctx.beginPath(); ctx.arc(d.x,d.y,1.5,0,Math.PI*2); ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+})();
+
+// ── QR canvas (decorative) ─────────────────────────
+function renderQR(){
+  const c=document.getElementById('qr-canvas');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,160,160);
+  ctx.fillStyle='#00D4FF';
+  const cell=6;
+  // seed a deterministic-ish pattern
+  for(let r=0;r<26;r++)for(let co=0;co<26;co++){
+    if(((r*37+co*13)%7)>3)ctx.fillRect(5+co*cell,5+r*cell,cell-1,cell-1);
+  }
+  [[0,0],[19,0],[0,19]].forEach(([cx,cy])=>{
+    ctx.strokeStyle='#00D4FF'; ctx.lineWidth=2;
+    ctx.strokeRect(5+cx*cell,5+cy*cell,7*cell,7*cell);
+    ctx.fillStyle='#00D4FF'; ctx.fillRect(5+cx*cell+cell,5+cy*cell+cell,5*cell,5*cell);
+    ctx.fillStyle='#0A1628'; ctx.fillRect(5+cx*cell+2*cell,5+cy*cell+2*cell,3*cell,3*cell);
+    ctx.fillStyle='#00D4FF'; ctx.fillRect(5+cx*cell+3*cell-2,5+cy*cell+3*cell-2,4,4);
+  });
+}
+</script>
+</body>
+</html>
